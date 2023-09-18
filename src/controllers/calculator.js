@@ -9,13 +9,17 @@ const initCalculator = async (req, res) => {
     num2 = parseFloat(num2);
 
     if (isNaN(num1) || isNaN(num2)) {
-        res.status(400).json({ error: 'Invalid num1 or num2 value' });
+        return res.status(400).json({ error: 'Invalid num1 or num2 value' });
     } else {
-        const calculator = new Calculator();
-        calculator.performOperation(operator, num1, num2, res);
         const id = new Date().valueOf();
+        const calculator = new Calculator();
+        const operationSuccessful = calculator.performOperation(operator, num1, num2, res);
+        if(!operationSuccessful.status){
+            return res.status(400).json({ error: operationSuccessful.message });
+        }
         calculatorInstances[id] = calculator;
-        res.json({
+
+        return res.json({
             result: calculator.currentResult,
             totalOps: calculator.totalOps,
             Id: id,
@@ -27,18 +31,15 @@ const performOperation = async (req, res) => {
     let { operator, num, id } = req.body;
 
     num = parseFloat(num);
-
     if (isNaN(num)) {
-        res.status(400).json({ error: 'Invalid num value' });
-        return;
+        return res.status(400).json({ error: 'Invalid num value' });
     }
-
     const calculator = calculatorInstances[id];
     if (!calculator) {
-        res.status(404).json({ error: 'Calculator not found' });
+        return res.status(404).json({ error: 'Calculator not found' });
     } else {
         calculator.performOperation(operator, calculator.currentResult, num, res);
-        res.json({
+        return res.json({
             result: calculator.currentResult,
             totalOps: calculator.totalOps,
             Id: id,
@@ -50,10 +51,13 @@ const undoOperation = async (req, res) => {
     const { id } = req.body;
     const calculator = calculatorInstances[id];
     if (!calculator) {
-        res.status(404).json({ error: 'Calculator not found' });
+        return res.status(404).json({ error: 'Calculator not found' });
     } else {
-        calculator.undo(res);
-        res.json({
+        const undoSuccessful = calculator.undo();
+        if (!undoSuccessful.status) {
+            return res.status(400).json({ error: undoSuccessful.message });
+        }
+        return res.json({
             result: calculator.currentResult,
             totalOps: calculator.totalOps,
         });
@@ -64,10 +68,10 @@ const resetCalculator = async (req, res) => {
     const { id } = req.query;
     const calculator = calculatorInstances[id];
     if (!calculator) {
-        res.status(404).json({ error: 'Calculator not found' });
+        return res.status(404).json({ error: 'Calculator not found' });
     } else {
         calculator.reset();
-        res.json({
+        return res.json({
             success: true,
             message: `Calculator ${id} is now reset`,
         });

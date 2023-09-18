@@ -13,8 +13,6 @@ const mockResponse = () => {
 
 describe('initCalculator', () => {
 
-    console.log('response', mockResponse)
-
     test("it should return an error for invalid num1 or num2 value", async () => {
 
         const req = mockRequest({ operator: 'add', num1: 'abc', num2: '4' })

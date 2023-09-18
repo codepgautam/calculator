@@ -7,7 +7,6 @@ class Calculator {
     }
 
     performOperation(operator, num1, num2, res) {
-
         this.undoHistory = [];
 
         switch (operator) {
@@ -22,45 +21,28 @@ class Calculator {
                 break;
             case 'divide':
                 if (num2 === 0) {
-                    res.status(400).json({ error: 'Division by zero is not allowed' })
+                    return { status: false, message: 'Division by zero is not allowed'}
                 }
                 this.currentResult = num1 / num2;
                 break;
             default:
-                res.status(400).json({ error: 'Invalid operator' });
+                return { status: false, message: 'Invalid operator'}
         }
         this.totalOps++;
-        this.operationHistory.push({ operator, num1, num2 });
+        this.operationHistory.push({ operator, num1, num2, result: this.currentResult });
+        return { status: true, message: ''}
     }
 
-    undo(res) {
+    undo() {
         if (this.operationHistory.length === 0) {
-            return res.status(400).json({ error: 'Cannot undo further' })
+            return { status: false, message: 'Cannot undo further' }
         }
-        
         const lastOperation = this.operationHistory.pop();
-        const { operator, num1, num2 } = lastOperation;
-    
-        switch (operator) {
-            case 'add':
-                this.currentResult -= num2;
-                break;
-            case 'subtract':
-                this.currentResult += num2;
-                break;
-            case 'multiply':
-                if (num2 === 0) {
-                    throw new Error("Division by zero is not allowed");
-                }
-                this.currentResult /= num2;
-                break;
-            case 'divide':
-                this.currentResult *= num2;
-                break;
-            default:
-                res.status(400).json({ error: 'Invalid operator' });
-        }
+        const { operator, num1, num2, result } = lastOperation;
+        this.undoHistory.push({ operator, num1, num2, result })
+        this.currentResult = num1
         this.totalOps--;
+        return { status: true, message: '' }
     }
 
     reset() {
