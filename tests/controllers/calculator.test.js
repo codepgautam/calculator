@@ -1,18 +1,17 @@
 
 const { describe, expect, test } = require('@jest/globals');
 const calculatorController = require('../../src/controllers/calculator');
-const Calculator = require('../../src/models/calculator'); // Import your Calculator class
+const { Calculator } = require('../../src/models/calculator');
 const calculatorInstances = {};
+const mockRequest = (body) => ({ body });
+const mockResponse = () => {
+    const res = {};
+    res.status = jest.fn().mockReturnValue(res);
+    res.json = jest.fn().mockReturnValue(res);
+    return res;
+};
 
 describe('initCalculator', () => {
-
-    const mockRequest = (body) => ({ body });
-    const mockResponse = () => {
-        const res = {};
-        res.status = jest.fn().mockReturnValue(res);
-        res.json = jest.fn().mockReturnValue(res);
-        return res;
-    };
 
     console.log('response', mockResponse)
 
@@ -63,15 +62,9 @@ describe('initCalculator', () => {
 
 describe('performOperation', () => {
 
-    const mockRequest = (body) => ({ body });
-    const mockResponse = () => {
-        const res = {};
-        res.status = jest.fn().mockReturnValue(res);
-        res.json = jest.fn().mockReturnValue(res);
-        return res;
-    };
-
-    console.log('response', mockResponse)
+    beforeAll(() => {
+        calculatorController.calculatorInstances['123'] = new Calculator();
+    });
 
     test("it should return an error for invalid num value", async () => {
 
@@ -97,9 +90,6 @@ describe('performOperation', () => {
 
     test('it should perform the operation', async () => {
 
-        const calculator = new Calculator();
-        calculatorInstances['123'] = calculator;
-
         const req = mockRequest({ operator: 'add', num: '5', id: '123' });
         const res = mockResponse();
 
@@ -107,6 +97,94 @@ describe('performOperation', () => {
 
         expect(res.status).not.toHaveBeenCalled();
         expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ result: 5, totalOps: 1, Id: '123' }));
+    });
+
+})
+
+describe('undoOperation', () => {
+
+    let calculator;
+
+    beforeAll(() => {
+        calculator = new Calculator();
+        calculatorController.calculatorInstances['123'] = calculator;
+    });
+
+    test("it should return an error when calculator instance not found", async () => {
+
+        const req = mockRequest({ id: 'invalidId' })
+        const res = mockResponse();
+
+        await calculatorController.undoOperation(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Calculator not found' });
+    });
+
+    test("it should handle undo when no history is available", async () => {
+
+        calculatorController.operationHistory = []
+
+        const req = mockRequest({ id: '123' })
+        const res = mockResponse();
+
+        await calculatorController.undoOperation(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Cannot undo further' });
+    });
+
+    test('it should perform the operation', async () => {
+
+        const req = mockRequest({ id: '123' });
+        const res = mockResponse();
+
+        await calculatorController.performOperation( mockRequest({ operator: 'add', num: 15, id: '123' }), mockResponse() );
+        await calculatorController.performOperation( mockRequest({ operator: 'subtract', num: 5, id: '123' }), mockResponse() );
+
+        await calculatorController.undoOperation(req, res);
+
+        expect(res.status).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ result: 15, totalOps: 1 }));
+    });
+
+})
+
+describe('resetCalculator', () => {
+
+    let calculator;
+
+    beforeAll(() => {
+        calculator = new Calculator();
+        calculatorController.calculatorInstances['123'] = calculator;
+    });
+
+    test("it should return an error when calculator instance not found", async () => {
+
+        const req = { query: { id: 'invalidId' }}
+        const res = mockResponse();
+
+        await calculatorController.resetCalculator(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Calculator not found' });
+    });
+
+    test('it should perform the operation', async () => {
+
+        const req = { query: { id: '123' }};
+        const res = mockResponse();
+
+        await calculatorController.performOperation( mockRequest({ operator: 'add', num: 15, id: '123' }), mockResponse() );
+
+        await calculatorController.resetCalculator(req, res);
+
+        expect(res.status).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true, message: 'Calculator 123 is now reset' }));
+        expect(calculator.currentResult).toBe(0);
+        expect(calculator.totalOps).toBe(0);
+        expect(calculator.operationHistory.length).toBe(0);
+        expect(calculator.undoHistory.length).toBe(0);
     });
 
 })

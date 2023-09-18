@@ -33,9 +33,9 @@ class Calculator {
         this.operationHistory.push({ operator, num1, num2 });
     }
 
-    undo() {
+    undo(res) {
         if (this.operationHistory.length === 0) {
-            return res.send('Cannot undo further');
+            return res.status(400).json({ error: 'Cannot undo further' })
         }
         
         const lastOperation = this.operationHistory.pop();
@@ -58,7 +58,7 @@ class Calculator {
                 this.currentResult *= num2;
                 break;
             default:
-                throw new Error("Invalid operator");
+                res.status(400).json({ error: 'Invalid operator' });
         }
         this.totalOps--;
     }

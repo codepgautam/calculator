@@ -52,7 +52,7 @@ const undoOperation = async (req, res) => {
     if (!calculator) {
         res.status(404).json({ error: 'Calculator not found' });
     } else {
-        calculator.undo();
+        calculator.undo(res);
         res.json({
             result: calculator.currentResult,
             totalOps: calculator.totalOps,
@@ -78,5 +78,6 @@ module.exports = {
     initCalculator,
     performOperation,
     undoOperation,
-    resetCalculator
+    resetCalculator,
+    calculatorInstances
 }
