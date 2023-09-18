@@ -12,7 +12,7 @@ const initCalculator = async (req, res) => {
         res.status(400).json({ error: 'Invalid num1 or num2 value' });
     } else {
         const calculator = new Calculator();
-        calculator.performOperation(operator, num1, num2);
+        calculator.performOperation(operator, num1, num2, res);
         const id = new Date().valueOf();
         calculatorInstances[id] = calculator;
         res.json({
@@ -37,7 +37,7 @@ const performOperation = async (req, res) => {
     if (!calculator) {
         res.status(404).json({ error: 'Calculator not found' });
     } else {
-        calculator.performOperation(operator, calculator.currentResult, num);
+        calculator.performOperation(operator, calculator.currentResult, num, res);
         res.json({
             result: calculator.currentResult,
             totalOps: calculator.totalOps,

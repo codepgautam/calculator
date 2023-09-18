@@ -6,7 +6,7 @@ class Calculator {
         this.undoHistory = [];
     }
 
-    performOperation(operator, num1, num2) {
+    performOperation(operator, num1, num2, res) {
 
         this.undoHistory = [];
 
@@ -22,12 +22,12 @@ class Calculator {
                 break;
             case 'divide':
                 if (num2 === 0) {
-                    throw new Error("Division by zero is not allowed");
+                    res.status(400).json({ error: 'Division by zero is not allowed' })
                 }
                 this.currentResult = num1 / num2;
                 break;
             default:
-                throw new Error("Invalid operator");
+                res.status(400).json({ error: 'Invalid operator' });
         }
         this.totalOps++;
         this.operationHistory.push({ operator, num1, num2 });
