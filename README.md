@@ -1,4 +1,4 @@
-# calculator
+# Calculator
 
 This is a simple backend calculator application that provides basic mathematical operations such as addition, subtraction, multiplication, and division.
 
@@ -17,24 +17,33 @@ This is a simple backend calculator application that provides basic mathematical
 - REST API: Communication protocol for making requests to the calculator.
 - Jest: JavaScript testing framework.
 
-##Installation
+## Installation
 
 1. Clone the repository to your local machine:
 
-   git clone <repository-url>
+   ```bash
+   git clone git@github.com:codepgautam/calculator.git
 
 2. Navigate to the project directory:
 
+   ```bash
    cd calculator
 
 3. Install the dependencies:
 
+   ```bash
    npm install
 
-##Testing
+4. Start the server
+
+   ```bash
+   npm start
+
+## Testing
 
 Jest test cases are included to ensure the correctness of the calculator's functionality. To run the tests, use the following command:
 
-  npm test
+   ```bash
+   npm test
 
    
