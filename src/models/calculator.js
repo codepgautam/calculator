@@ -6,7 +6,7 @@ class Calculator {
         this.undoHistory = [];
     }
 
-    performOperation(operator, num1, num2, res) {
+    operation(operator, num1, num2, res) {
         this.undoHistory = [];
 
         switch (operator) {

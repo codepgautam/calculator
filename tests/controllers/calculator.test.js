@@ -2,7 +2,6 @@
 const { describe, expect, test } = require('@jest/globals');
 const calculatorController = require('../../src/controllers/calculator');
 const { Calculator } = require('../../src/models/calculator');
-const calculatorInstances = {};
 const mockRequest = (body) => ({ body });
 const mockResponse = () => {
     const res = {};
