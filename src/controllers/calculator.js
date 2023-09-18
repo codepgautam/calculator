@@ -35,10 +35,14 @@ const performOperation = async (req, res) => {
         return res.status(400).json({ error: 'Invalid num value' });
     }
     const calculator = calculatorInstances[id];
+
     if (!calculator) {
         return res.status(404).json({ error: 'Calculator not found' });
     } else {
-        calculator.performOperation(operator, calculator.currentResult, num, res);
+        const operationSuccessful = calculator.performOperation(operator, calculator.currentResult, num, res);
+        if(!operationSuccessful.status){
+            return res.status(400).json({ error: operationSuccessful.message });
+        }
         return res.json({
             result: calculator.currentResult,
             totalOps: calculator.totalOps,
