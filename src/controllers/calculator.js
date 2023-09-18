@@ -13,7 +13,7 @@ const initCalculator = async (req, res) => {
     } else {
         const id = new Date().valueOf();
         const calculator = new Calculator();
-        const operationSuccessful = calculator.operation(operator, num1, num2, res);
+        const operationSuccessful = calculator.operation(operator, num1, num2);
         if (!operationSuccessful.status) {
             return res.status(400).json({ error: operationSuccessful.message });
         }
@@ -39,7 +39,7 @@ const performOperation = async (req, res) => {
     if (!calculator) {
         return res.status(404).json({ error: 'Calculator not found' });
     } else {
-        const operationSuccessful = calculator.operation(operator, calculator.currentResult, num, res);
+        const operationSuccessful = calculator.operation(operator, calculator.currentResult, num);
         if (!operationSuccessful.status) {
             return res.status(400).json({ error: operationSuccessful.message });
         }
