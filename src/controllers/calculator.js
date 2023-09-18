@@ -1,10 +1,10 @@
 const { Calculator } = require('../models/calculator')
 
-const calculatorInstances = {}; 
+const calculatorInstances = {};
 
 const initCalculator = async (req, res) => {
     let { operator, num1, num2 } = req.body;
-    
+
     num1 = parseFloat(num1);
     num2 = parseFloat(num2);
 
@@ -14,7 +14,7 @@ const initCalculator = async (req, res) => {
         const id = new Date().valueOf();
         const calculator = new Calculator();
         const operationSuccessful = calculator.performOperation(operator, num1, num2, res);
-        if(!operationSuccessful.status){
+        if (!operationSuccessful.status) {
             return res.status(400).json({ error: operationSuccessful.message });
         }
         calculatorInstances[id] = calculator;
@@ -40,7 +40,7 @@ const performOperation = async (req, res) => {
         return res.status(404).json({ error: 'Calculator not found' });
     } else {
         const operationSuccessful = calculator.performOperation(operator, calculator.currentResult, num, res);
-        if(!operationSuccessful.status){
+        if (!operationSuccessful.status) {
             return res.status(400).json({ error: operationSuccessful.message });
         }
         return res.json({
