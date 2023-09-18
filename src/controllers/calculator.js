@@ -11,50 +11,43 @@ class Calculator {
         this.currentResult = 0;
         this.totalOps = 0;
         this.operationHistory = [];
+        this.undoHistory = [];
     }
 
-    performOperation(operator, num) {
+    performOperation(operator, num1, num2) {
+
+        // Clear redo history when a new operation is performed
+        this.undoHistory = [];
+
         switch (operator) {
             case 'add':
-                this.currentResult += num;
+                this.currentResult = num1 + num2;
                 break;
             case 'subtract':
-                this.currentResult -= num;
+                this.currentResult = num1 - num2;
                 break;
             case 'multiply':
-                this.currentResult *= num;
+                this.currentResult = num1 * num2;
                 break;
             case 'divide':
-                if (num === 0) {
+                if (num2 === 0) {
                     throw new Error("Division by zero is not allowed");
                 }
-                this.currentResult /= num;
+                this.currentResult = num1 / num2;
                 break;
             default:
                 throw new Error("Invalid operator");
         }
         this.totalOps++;
-        this.operationHistory.push({ operator, num });
+        this.operationHistory.push({ operator, num1, num2 });
     }
 
     undo() {
         if (this.operationHistory.length > 0) {
             const lastOperation = this.operationHistory.pop();
-            const { operator, num } = lastOperation;
-            switch (operator) {
-                case 'add':
-                    this.currentResult -= num;
-                    break;
-                case 'subtract':
-                    this.currentResult += num;
-                    break;
-                case 'multiply':
-                    this.currentResult /= num;
-                    break;
-                case 'divide':
-                    this.currentResult *= num;
-                    break;
-            }
+            const { operator, num1, num2 } = lastOperation;
+            this.undoHistory.push({ operator, num1, num2 });
+            this.performOperation(this.invertOperator(operator), num1, num2);
             this.totalOps--;
         }
     }
@@ -64,33 +57,61 @@ class Calculator {
         this.totalOps = 0;
         this.operationHistory = [];
     }
+
+    invertOperator(operator) {
+        switch (operator) {
+            case 'add':
+                return 'subtract';
+            case 'subtract':
+                return 'add';
+            case 'multiply':
+                return 'divide';
+            case 'divide':
+                return 'multiply';
+            default:
+                throw new Error("Invalid operator");
+        }
+    }
 }
 
 
 const initCalculator = async (req, res) => {
-    const { operator, num1, num2 } = req.body;
-    const calculator = new Calculator();
-    calculator.performOperation(operator, num1);
-    calculator.performOperation(operator, num2);
-    const id = Math.random().toString(36).substr(2, 9);
-    calculator.totalOps--;
-    calculatorInstances[id] = calculator;
-    res.json({
-        result: calculator.currentResult,
-        totalOps: calculator.totalOps,
-        Id: id,
-    });
+    let { operator, num1, num2 } = req.body;
+    
+    // Convert num1 and num2 to floating-point numbers
+    num1 = parseFloat(num1);
+    num2 = parseFloat(num2);
+
+    if (isNaN(num1) || isNaN(num2)) {
+        res.status(400).json({ error: 'Invalid num1 or num2 value' });
+    } else {
+        const calculator = new Calculator();
+        calculator.performOperation(operator, num1, num2);
+        const id = new Date().valueOf();
+        calculatorInstances[id] = calculator;
+        res.json({
+            result: calculator.currentResult,
+            totalOps: calculator.totalOps,
+            Id: id,
+        });
+    }
 };
 
 const performOperation = async (req, res) => {
-    console.log('instances', calculatorInstances)
-    const { operator, num, id } = req.body;
-    const calculator = calculatorInstances[id];
+    let { operator, num, id } = req.body;
 
+    num = parseFloat(num);
+
+    if (isNaN(num)) {
+        res.status(400).json({ error: 'Invalid num value' });
+        return;
+    }
+
+    const calculator = calculatorInstances[id];
     if (!calculator) {
         res.status(404).json({ error: 'Calculator not found' });
     } else {
-        calculator.performOperation(operator, num);
+        calculator.performOperation(operator, calculator.currentResult, num);
         res.json({
             result: calculator.currentResult,
             totalOps: calculator.totalOps,
@@ -102,6 +123,7 @@ const performOperation = async (req, res) => {
 const undoOperation = async (req, res) => {
     const { id } = req.body;
     const calculator = calculatorInstances[id];
+    console.log('calculator', calculator)
     if (!calculator) {
         res.status(404).json({ error: 'Calculator not found' });
     } else {
