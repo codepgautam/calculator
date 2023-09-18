@@ -137,8 +137,8 @@ describe('undoOperation', () => {
         const req = mockRequest({ id: '123' });
         const res = mockResponse();
 
-        await calculatorController.performOperation( mockRequest({ operator: 'add', num: 15, id: '123' }), mockResponse() );
-        await calculatorController.performOperation( mockRequest({ operator: 'subtract', num: 5, id: '123' }), mockResponse() );
+        await calculatorController.performOperation(mockRequest({ operator: 'add', num: 15, id: '123' }), mockResponse());
+        await calculatorController.performOperation(mockRequest({ operator: 'subtract', num: 5, id: '123' }), mockResponse());
 
         await calculatorController.undoOperation(req, res);
 
@@ -159,7 +159,7 @@ describe('resetCalculator', () => {
 
     test("it should return an error when calculator instance not found", async () => {
 
-        const req = { query: { id: 'invalidId' }}
+        const req = { query: { id: 'invalidId' } }
         const res = mockResponse();
 
         await calculatorController.resetCalculator(req, res);
@@ -170,10 +170,10 @@ describe('resetCalculator', () => {
 
     test('it should perform the operation', async () => {
 
-        const req = { query: { id: '123' }};
+        const req = { query: { id: '123' } };
         const res = mockResponse();
 
-        await calculatorController.performOperation( mockRequest({ operator: 'add', num: 15, id: '123' }), mockResponse() );
+        await calculatorController.performOperation(mockRequest({ operator: 'add', num: 15, id: '123' }), mockResponse());
 
         await calculatorController.resetCalculator(req, res);
 
