@@ -16,7 +16,6 @@ class Calculator {
 
     performOperation(operator, num1, num2) {
 
-        // Clear redo history when a new operation is performed
         this.undoHistory = [];
 
         switch (operator) {
@@ -43,42 +42,48 @@ class Calculator {
     }
 
     undo() {
-        if (this.operationHistory.length > 0) {
-            const lastOperation = this.operationHistory.pop();
-            const { operator, num1, num2 } = lastOperation;
-            this.undoHistory.push({ operator, num1, num2 });
-            this.performOperation(this.invertOperator(operator), num1, num2);
-            this.totalOps--;
+        if (this.operationHistory.length === 0) {
+            return res.send('Cannot undo further');
         }
+        
+        const lastOperation = this.operationHistory.pop();
+        const { operator, num1, num2 } = lastOperation;
+    
+        switch (operator) {
+            case 'add':
+                this.currentResult -= num2;
+                break;
+            case 'subtract':
+                this.currentResult += num2;
+                break;
+            case 'multiply':
+                if (num2 === 0) {
+                    throw new Error("Division by zero is not allowed");
+                }
+                this.currentResult /= num2;
+                break;
+            case 'divide':
+                this.currentResult *= num2;
+                break;
+            default:
+                throw new Error("Invalid operator");
+        }
+        this.totalOps--;
     }
 
     reset() {
         this.currentResult = 0;
         this.totalOps = 0;
         this.operationHistory = [];
+        this.undoHistory = [];
     }
 
-    invertOperator(operator) {
-        switch (operator) {
-            case 'add':
-                return 'subtract';
-            case 'subtract':
-                return 'add';
-            case 'multiply':
-                return 'divide';
-            case 'divide':
-                return 'multiply';
-            default:
-                throw new Error("Invalid operator");
-        }
-    }
 }
 
 
 const initCalculator = async (req, res) => {
     let { operator, num1, num2 } = req.body;
     
-    // Convert num1 and num2 to floating-point numbers
     num1 = parseFloat(num1);
     num2 = parseFloat(num2);
 
