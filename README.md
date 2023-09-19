@@ -38,12 +38,17 @@ This is a simple backend calculator application that provides basic mathematical
 
    ```bash
    npm start
+   
+## Postman Collection
 
-## Testing
+   https://elements.getpostman.com/redirect?entityId=29804685-6da40927-8ba7-4aab-9a99-21efa576ff2c&entityType=collection
+
+## Test cases
 
 Jest test cases are included to ensure the correctness of the calculator's functionality. To run the tests, use the following command:
 
    ```bash
    npm test
+ 
 
    
