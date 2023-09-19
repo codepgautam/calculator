@@ -2,9 +2,10 @@
   "name": "calculator",
   "version": "1.0.0",
   "description": "A backend calculator with mathematical operations (Addition, Subtraction, Division, and Multiplication)",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "node src/app.js"
   },
   "keywords": [],
   "author": "",
